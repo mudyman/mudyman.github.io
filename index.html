@@ -3,124 +3,480 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>八两的博客</title>
+    <title>八两的博客 - 记录技术与生活</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
+        :root {
+            --primary: #2d3436;
+            --accent: #6c5ce7;
+            --accent-light: #a29bfe;
+            --bg: #fafbfc;
+            --card-bg: #ffffff;
+            --text: #2d3436;
+            --text-light: #636e72;
+            --border: #e1e4e8;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; }
-        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; text-align: center; }
-        header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
-        nav { background: #fff; padding: 1rem 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; max-width: 900px; margin: 0 auto; }
-        nav .nav-links a { color: #667eea; text-decoration: none; margin-left: 1rem; }
-        nav .nav-links a:hover { text-decoration: underline; }
-        main { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
-        .post { background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .post h2 { color: #333; margin-bottom: 0.5rem; cursor: pointer; }
-        .post h2:hover { color: #667eea; }
-        .post-meta { color: #888; font-size: 0.85rem; margin-bottom: 1rem; }
-        .post-content { line-height: 1.8; }
-        .post-content p { margin-bottom: 0.8rem; }
+        
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        
+        /* Header */
+        header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+        
+        .logo span { color: var(--accent); }
+        
+        nav { display: flex; align-items: center; gap: 1.5rem; }
+        
+        nav a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+        
+        nav a:hover { color: var(--accent); }
+        
+        .btn {
+            padding: 0.6rem 1.4rem;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5849c4;
+            transform: translateY(-1px);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--accent);
+            color: var(--accent);
+        }
+        
+        .btn-outline:hover {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .user-menu {
+            display: none;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-menu.show { display: flex; }
+        
+        .user-email {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+        
+        /* Hero */
+        .hero {
+            background: linear-gradient(135deg, #2d3436 0%, #1a1a2e 100%);
+            color: white;
+            padding: 5rem 2rem;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.85;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Main */
+        main {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+        }
+        
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+        
+        /* Post Card */
+        .post-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .post-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+        
+        .post-card h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 0.8rem;
+            color: var(--primary);
+            cursor: pointer;
+        }
+        
+        .post-card h2:hover { color: var(--accent); }
+        
+        .post-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+        
+        .post-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .post-excerpt {
+            color: var(--text-light);
+            line-height: 1.8;
+        }
+        
+        .post-excerpt p {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .read-more {
+            display: inline-block;
+            margin-top: 1rem;
+            color: var(--accent);
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .read-more:hover { text-decoration: underline; }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-light);
+        }
+        
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1.5rem;
+            opacity: 0.3;
+        }
         
         /* Modal */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
-        .modal.show { display: flex; align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 2rem; border-radius: 12px; width: 90%; max-width: 400px; }
-        .modal-content h2 { margin-bottom: 1.5rem; text-align: center; }
-        .modal-content input, .modal-content textarea { width: 100%; padding: 0.8rem; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; }
-        .modal-content textarea { height: 200px; resize: vertical; }
-        .modal-content button { width: 100%; padding: 0.8rem; background: #667eea; color: white; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; }
-        .modal-content button:hover { background: #5568d3; }
-        .modal-content .switch { text-align: center; margin-top: 1rem; }
-        .modal-content .switch a { color: #667eea; cursor: pointer; }
-        .error { color: red; font-size: 0.85rem; margin-bottom: 0.5rem; display: none; }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
         
-        .user-info { display: none; align-items: center; gap: 1rem; }
-        .user-info.show { display: flex; }
-        .user-info span { color: #333; }
-        .user-info button { padding: 0.5rem 1rem; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; }
+        .modal-overlay.show { display: flex; }
         
-        .empty { text-align: center; padding: 3rem; color: #888; }
+        .modal {
+            background: var(--card-bg);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 480px;
+            padding: 2.5rem;
+            animation: modalIn 0.3s ease;
+        }
         
-        footer { background: #333; color: white; text-align: center; padding: 2rem; margin-top: 3rem; }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .modal h2 {
+            font-family: 'Playfair Display', serif;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+        }
+        
+        .form-group { margin-bottom: 1.2rem; }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .form-group textarea {
+            min-height: 180px;
+            resize: vertical;
+        }
+        
+        .modal .btn { width: 100%; margin-top: 0.5rem; }
+        
+        .modal-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text-light);
+        }
+        
+        .modal-footer a {
+            color: var(--accent);
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+        
+        .error-msg {
+            color: #e74c3c;
+            font-size: 0.85rem;
+            margin-bottom: 0.8rem;
+            display: none;
+        }
+        
+        .error-msg.show { display: block; }
+        
+        /* Footer */
+        footer {
+            background: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 3rem 2rem;
+            margin-top: 4rem;
+        }
+        
+        footer p { opacity: 0.7; }
+        
+        /* Loading */
+        .loading {
+            display: flex;
+            justify-content: center;
+            padding: 3rem;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .hero p { font-size: 1rem; }
+            .header-inner { padding: 1rem; }
+            .logo { font-size: 1.4rem; }
+            .post-card { padding: 1.5rem; }
+        }
     </style>
 </head>
 <body>
     <header>
-        <h1>八两的博客</h1>
-        <p>记录技术，记录生活</p>
+        <div class="header-inner">
+            <a href="/" class="logo">八两<span>.</span></a>
+            <nav>
+                <a href="/">首页</a>
+                <a href="#" id="writeNav" style="display:none">写文章</a>
+                <div class="user-menu" id="userMenu">
+                    <span class="user-email" id="userEmail"></span>
+                    <button class="btn btn-outline" onclick="logout()">退出</button>
+                </div>
+                <div id="authButtons">
+                    <button class="btn btn-outline" onclick="showModal('loginModal')">登录</button>
+                    <button class="btn btn-primary" onclick="showModal('registerModal')">注册</button>
+                </div>
+            </nav>
+        </div>
     </header>
     
-    <nav>
-        <div class="nav-links">
-            <a href="/">首页</a>
-            <a href="#" id="writeBtn">写文章</a>
-        </div>
-        <div class="user-info" id="userInfo">
-            <span id="userEmail"></span>
-            <button onclick="logout()">退出</button>
-        </div>
-        <div class="nav-links" id="authLinks">
-            <a href="#" id="loginBtn">登录</a>
-            <a href="#" id="registerBtn">注册</a>
-        </div>
-    </nav>
+    <section class="hero">
+        <h1>八两的博客</h1>
+        <p>记录技术探索与生活感悟，分享让世界变得更好的点点滴滴。</p>
+    </section>
     
-    <main id="postsContainer">
-        <div class="empty">加载中...</div>
+    <main>
+        <h2 class="section-title">最新文章</h2>
+        <div id="postsContainer">
+            <div class="loading"><div class="spinner"></div></div>
+        </div>
     </main>
     
     <!-- 登录弹窗 -->
-    <div class="modal" id="loginModal">
-        <div class="modal-content">
-            <h2>登录</h2>
-            <div class="error" id="loginError"></div>
-            <input type="email" id="loginEmail" placeholder="邮箱">
-            <input type="password" id="loginPassword" placeholder="密码">
-            <button onclick="login()">登录</button>
-            <div class="switch">
-                没有账号？<a onclick="showRegister()">立即注册</a>
-            </div>
-            <div class="switch">
-                <a onclick="closeModal('loginModal')">关闭</a>
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <h2>欢迎回来</h2>
+            <div class="error-msg" id="loginError"></div>
+            <form onsubmit="event.preventDefault(); login();">
+                <div class="form-group">
+                    <label>邮箱</label>
+                    <input type="email" id="loginEmail" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="loginPassword" placeholder="输入密码" required>
+                </div>
+                <button type="submit" class="btn btn-primary">登录</button>
+            </form>
+            <div class="modal-footer">
+                还没有账号？<a onclick="switchModal('loginModal', 'registerModal')">立即注册</a>
             </div>
         </div>
     </div>
     
     <!-- 注册弹窗 -->
-    <div class="modal" id="registerModal">
-        <div class="modal-content">
-            <h2>注册</h2>
-            <div class="error" id="registerError"></div>
-            <input type="email" id="registerEmail" placeholder="邮箱">
-            <input type="password" id="registerPassword" placeholder="密码（至少6位）">
-            <button onclick="register()">注册</button>
-            <div class="switch">
-                已有账号？<a onclick="showLogin()">立即登录</a>
-            </div>
-            <div class="switch">
-                <a onclick="closeModal('registerModal')">关闭</a>
+    <div class="modal-overlay" id="registerModal">
+        <div class="modal">
+            <h2>加入我们</h2>
+            <div class="error-msg" id="registerError"></div>
+            <form onsubmit="event.preventDefault(); register();">
+                <div class="form-group">
+                    <label>邮箱</label>
+                    <input type="email" id="registerEmail" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="registerPassword" placeholder="至少6位密码" required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary">注册</button>
+            </form>
+            <div class="modal-footer">
+                已有账号？<a onclick="switchModal('registerModal', 'loginModal')">立即登录</a>
             </div>
         </div>
     </div>
     
     <!-- 写文章弹窗 -->
-    <div class="modal" id="writeModal">
-        <div class="modal-content" style="max-width: 600px;">
-            <h2>写文章</h2>
-            <div class="error" id="writeError"></div>
-            <input type="text" id="postTitle" placeholder="标题">
-            <textarea id="postContent" placeholder="正文内容（支持换行）"></textarea>
-            <button onclick="submitPost()">发布</button>
-            <div class="switch">
-                <a onclick="closeModal('writeModal')">关闭</a>
+    <div class="modal-overlay" id="writeModal">
+        <div class="modal" style="max-width: 640px;">
+            <h2>撰写新文章</h2>
+            <div class="error-msg" id="writeError"></div>
+            <form onsubmit="event.preventDefault(); submitPost();">
+                <div class="form-group">
+                    <label>标题</label>
+                    <input type="text" id="postTitle" placeholder="输入文章标题" required>
+                </div>
+                <div class="form-group">
+                    <label>正文</label>
+                    <textarea id="postContent" placeholder="写下你的想法..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">发布文章</button>
+            </form>
+            <div class="modal-footer">
+                <a onclick="closeModal('writeModal')">取消</a>
             </div>
         </div>
     </div>
     
     <footer>
-        <p>&copy; 2026 八两的博客. 基于 GitHub Pages + Firebase 构建.</p>
+        <p>© 2026 八两的博客 · 用 ♥️ 构建</p>
     </footer>
 
     <script>
@@ -135,7 +491,7 @@
             measurementId: "G-4QTFFD1FL5"
         };
 
-        // 初始化 Firebase
+        // 初始化
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
@@ -146,83 +502,94 @@
         auth.onAuthStateChanged((user) => {
             currentUser = user;
             updateUI();
-            if (user) {
-                loadPosts();
-            }
+            loadPosts();
         });
 
-        // 更新界面
         function updateUI() {
-            const userInfo = document.getElementById('userInfo');
-            const authLinks = document.getElementById('authLinks');
-            const writeBtn = document.getElementById('writeBtn');
+            const userMenu = document.getElementById('userMenu');
+            const authButtons = document.getElementById('authButtons');
+            const writeNav = document.getElementById('writeNav');
             
             if (currentUser) {
-                userInfo.classList.add('show');
-                authLinks.style.display = 'none';
-                writeBtn.style.display = 'inline';
-                document.getElementById('userEmail').textContent = currentUser.email;
+                userMenu.classList.add('show');
+                authButtons.style.display = 'none';
+                writeNav.style.display = 'inline';
+                document.getElementById('userEmail').textContent = currentUser.email.split('@')[0];
             } else {
-                userInfo.classList.remove('show');
-                authLinks.style.display = 'block';
-                writeBtn.style.display = 'none';
+                userMenu.classList.remove('show');
+                authButtons.style.display = 'flex';
+                writeNav.style.display = 'none';
             }
         }
 
-        // 加载文章
         function loadPosts() {
             const container = document.getElementById('postsContainer');
-            container.innerHTML = '<div class="empty">加载中...</div>';
+            container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
             
             db.collection('posts').orderBy('createdAt', 'desc').get()
                 .then((snapshot) => {
                     if (snapshot.empty) {
-                        container.innerHTML = '<div class="empty">还没有文章，快来写第一篇吧！</div>';
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V9a2 2 0 012-2h2a2 2 0 012 2v9a2 2 0 01-2 2h-2z"/>
+                                </svg>
+                                <p>还没有文章，快来写下第一篇吧！</p>
+                            </div>
+                        `;
                         return;
                     }
                     container.innerHTML = '';
                     snapshot.forEach((doc) => {
                         const post = doc.data();
-                        const date = post.createdAt ? new Date(post.createdAt.seconds * 1000).toLocaleDateString() : '未知';
+                        const date = post.createdAt ? new Date(post.createdAt.seconds * 1000).toLocaleDateString('zh-CN') : '未知';
                         const html = `
-                            <article class="post">
-                                <h2>${escapeHtml(post.title)}</h2>
-                                <div class="post-meta">${date} · ${escapeHtml(post.author)}</div>
-                                <div class="post-content">${escapeHtml(post.content).replace(/\n/g, '<br>')}</div>
+                            <article class="post-card">
+                                <h2 onclick="viewPost('${doc.id}')">${escapeHtml(post.title)}</h2>
+                                <div class="post-meta">
+                                    <span>📅 ${date}</span>
+                                    <span>👤 ${escapeHtml(post.author)}</span>
+                                </div>
+                                <div class="post-excerpt">
+                                    <p>${escapeHtml(post.content)}</p>
+                                </div>
+                                <span class="read-more" onclick="viewPost('${doc.id}')">阅读全文 →</span>
                             </article>
                         `;
                         container.innerHTML += html;
                     });
                 })
                 .catch((err) => {
-                    container.innerHTML = '<div class="empty">加载失败: ' + err.message + '</div>';
+                    container.innerHTML = `<div class="empty-state"><p>加载失败: ${err.message}</p></div>`;
                 });
         }
 
-        // 注册
+        function viewPost(id) {
+            db.collection('posts').doc(id).get()
+                .then((doc) => {
+                    if (doc.exists) {
+                        const post = doc.data();
+                        alert(`${post.title}\n\n作者: ${post.author}\n\n${post.content}`);
+                    }
+                });
+        }
+
         function register() {
             const email = document.getElementById('registerEmail').value;
             const password = document.getElementById('registerPassword').value;
             const errorEl = document.getElementById('registerError');
             
-            if (password.length < 6) {
-                errorEl.textContent = '密码至少需要6位';
-                errorEl.style.display = 'block';
-                return;
-            }
-            
             auth.createUserWithEmailAndPassword(email, password)
                 .then(() => {
-                    closeModal('registerModal');
-                    alert('注册成功！');
+                    closeAllModals();
+                    alert('注册成功！欢迎加入我们 🎉');
                 })
                 .catch((err) => {
                     errorEl.textContent = err.message;
-                    errorEl.style.display = 'block';
+                    errorEl.classList.add('show');
                 });
         }
 
-        // 登录
         function login() {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
@@ -230,25 +597,18 @@
             
             auth.signInWithEmailAndPassword(email, password)
                 .then(() => {
-                    closeModal('loginModal');
+                    closeAllModals();
                 })
                 .catch((err) => {
                     errorEl.textContent = err.message;
-                    errorEl.style.display = 'block';
+                    errorEl.classList.add('show');
                 });
         }
 
-        // 退出
-        function logout() {
-            auth.signOut();
-        }
+        function logout() { auth.signOut(); }
 
-        // 发布文章
         function submitPost() {
-            if (!currentUser) {
-                alert('请先登录');
-                return;
-            }
+            if (!currentUser) return alert('请先登录');
             
             const title = document.getElementById('postTitle').value;
             const content = document.getElementById('postContent').value;
@@ -256,55 +616,55 @@
             
             if (!title || !content) {
                 errorEl.textContent = '请填写标题和内容';
-                errorEl.style.display = 'block';
+                errorEl.classList.add('show');
                 return;
             }
             
             db.collection('posts').add({
-                title: title,
-                content: content,
+                title,
+                content,
                 author: currentUser.email,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             })
             .then(() => {
-                closeModal('writeModal');
+                closeAllModals();
                 document.getElementById('postTitle').value = '';
                 document.getElementById('postContent').value = '';
                 loadPosts();
-                alert('发布成功！');
+                alert('发布成功！🎉');
             })
             .catch((err) => {
                 errorEl.textContent = err.message;
-                errorEl.style.display = 'block';
+                errorEl.classList.add('show');
             });
         }
 
-        // 弹窗控制
-        function showLogin() {
-            closeModal('registerModal');
-            document.getElementById('loginModal').classList.add('show');
-        }
-        
-        function showRegister() {
-            closeModal('loginModal');
-            document.getElementById('registerModal').classList.add('show');
-        }
-        
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('show');
-            document.querySelectorAll('.error').forEach(el => el.style.display = 'none');
+        function showModal(id) {
+            document.getElementById(id).classList.add('show');
         }
 
-        document.getElementById('loginBtn').onclick = () => document.getElementById('loginModal').classList.add('show');
-        document.getElementById('registerBtn').onclick = () => document.getElementById('registerModal').classList.add('show');
-        document.getElementById('writeBtn').onclick = () => document.getElementById('writeModal').classList.add('show');
+        function closeAllModals() {
+            document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show'));
+            document.querySelectorAll('.error-msg').forEach(e => e.classList.remove('show'));
+        }
 
-        // XSS 防护
+        function switchModal(from, to) {
+            document.getElementById(from).classList.remove('show');
+            setTimeout(() => document.getElementById(to).classList.add('show'), 100);
+        }
+
+        document.getElementById('writeNav').onclick = () => showModal('writeModal');
+
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
+
+        // 点击遮罩关闭
+        document.querySelectorAll('.modal-overlay').forEach(el => {
+            el.onclick = (e) => { if (e.target === el) closeAllModals(); };
+        });
     </script>
 </body>
 </html>
