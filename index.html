@@ -4,81 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>八两的博客</title>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: #f5f5f5;
-        }
-        header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 3rem 2rem;
-            text-align: center;
-        }
-        header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-        header p {
-            opacity: 0.9;
-            font-size: 1.1rem;
-        }
-        nav {
-            background: #fff;
-            padding: 1rem 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        nav a {
-            color: #667eea;
-            text-decoration: none;
-            margin: 0 1rem;
-            font-weight: 500;
-        }
-        nav a:hover {
-            text-decoration: underline;
-        }
-        main {
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-        .post {
-            background: white;
-            border-radius: 8px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .post h2 {
-            color: #333;
-            margin-bottom: 1rem;
-        }
-        .post-meta {
-            color: #888;
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-        .post-content {
-            line-height: 1.8;
-        }
-        .post-content p {
-            margin-bottom: 1rem;
-        }
-        footer {
-            background: #333;
-            color: white;
-            text-align: center;
-            padding: 2rem;
-            margin-top: 3rem;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; }
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; text-align: center; }
+        header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        nav { background: #fff; padding: 1rem 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; max-width: 900px; margin: 0 auto; }
+        nav .nav-links a { color: #667eea; text-decoration: none; margin-left: 1rem; }
+        nav .nav-links a:hover { text-decoration: underline; }
+        main { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+        .post { background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .post h2 { color: #333; margin-bottom: 0.5rem; cursor: pointer; }
+        .post h2:hover { color: #667eea; }
+        .post-meta { color: #888; font-size: 0.85rem; margin-bottom: 1rem; }
+        .post-content { line-height: 1.8; }
+        .post-content p { margin-bottom: 0.8rem; }
+        
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal.show { display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 2rem; border-radius: 12px; width: 90%; max-width: 400px; }
+        .modal-content h2 { margin-bottom: 1.5rem; text-align: center; }
+        .modal-content input, .modal-content textarea { width: 100%; padding: 0.8rem; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; }
+        .modal-content textarea { height: 200px; resize: vertical; }
+        .modal-content button { width: 100%; padding: 0.8rem; background: #667eea; color: white; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; }
+        .modal-content button:hover { background: #5568d3; }
+        .modal-content .switch { text-align: center; margin-top: 1rem; }
+        .modal-content .switch a { color: #667eea; cursor: pointer; }
+        .error { color: red; font-size: 0.85rem; margin-bottom: 0.5rem; display: none; }
+        
+        .user-info { display: none; align-items: center; gap: 1rem; }
+        .user-info.show { display: flex; }
+        .user-info span { color: #333; }
+        .user-info button { padding: 0.5rem 1rem; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; }
+        
+        .empty { text-align: center; padding: 3rem; color: #888; }
+        
+        footer { background: #333; color: white; text-align: center; padding: 2rem; margin-top: 3rem; }
     </style>
 </head>
 <body>
@@ -88,25 +53,258 @@
     </header>
     
     <nav>
-        <a href="/">首页</a>
-        <a href="/about.html">关于</a>
-        <a href="https://github.com/mudyman">GitHub</a>
+        <div class="nav-links">
+            <a href="/">首页</a>
+            <a href="#" id="writeBtn">写文章</a>
+        </div>
+        <div class="user-info" id="userInfo">
+            <span id="userEmail"></span>
+            <button onclick="logout()">退出</button>
+        </div>
+        <div class="nav-links" id="authLinks">
+            <a href="#" id="loginBtn">登录</a>
+            <a href="#" id="registerBtn">注册</a>
+        </div>
     </nav>
     
-    <main>
-        <article class="post">
-            <h2>欢迎来到我的博客</h2>
-            <div class="post-meta">2026年2月25日</div>
-            <div class="post-content">
-                <p>你好！我是八两。</p>
-                <p>这是一个基于 GitHub Pages 的简单博客，我会在这里分享一些技术心得和生活点滴。</p>
-                <p>欢迎访问我的 <a href="https://github.com/mudyman">GitHub</a>！</p>
-            </div>
-        </article>
+    <main id="postsContainer">
+        <div class="empty">加载中...</div>
     </main>
     
+    <!-- 登录弹窗 -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <h2>登录</h2>
+            <div class="error" id="loginError"></div>
+            <input type="email" id="loginEmail" placeholder="邮箱">
+            <input type="password" id="loginPassword" placeholder="密码">
+            <button onclick="login()">登录</button>
+            <div class="switch">
+                没有账号？<a onclick="showRegister()">立即注册</a>
+            </div>
+            <div class="switch">
+                <a onclick="closeModal('loginModal')">关闭</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 注册弹窗 -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <h2>注册</h2>
+            <div class="error" id="registerError"></div>
+            <input type="email" id="registerEmail" placeholder="邮箱">
+            <input type="password" id="registerPassword" placeholder="密码（至少6位）">
+            <button onclick="register()">注册</button>
+            <div class="switch">
+                已有账号？<a onclick="showLogin()">立即登录</a>
+            </div>
+            <div class="switch">
+                <a onclick="closeModal('registerModal')">关闭</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 写文章弹窗 -->
+    <div class="modal" id="writeModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <h2>写文章</h2>
+            <div class="error" id="writeError"></div>
+            <input type="text" id="postTitle" placeholder="标题">
+            <textarea id="postContent" placeholder="正文内容（支持换行）"></textarea>
+            <button onclick="submitPost()">发布</button>
+            <div class="switch">
+                <a onclick="closeModal('writeModal')">关闭</a>
+            </div>
+        </div>
+    </div>
+    
     <footer>
-        <p>&copy; 2026 八两的博客. 基于 GitHub Pages 构建.</p>
+        <p>&copy; 2026 八两的博客. 基于 GitHub Pages + Firebase 构建.</p>
     </footer>
+
+    <script>
+        // Firebase 配置
+        const firebaseConfig = {
+            apiKey: "AIzaSyAsjAfkl5N-8dHPciVjhZmfKy6Loo5n6QA",
+            authDomain: "blog-fe0d5.firebaseapp.com",
+            projectId: "blog-fe0d5",
+            storageBucket: "blog-fe0d5.firebasestorage.app",
+            messagingSenderId: "570968726858",
+            appId: "1:570968726858:web:f8a2ee8a7335c80c9175b3",
+            measurementId: "G-4QTFFD1FL5"
+        };
+
+        // 初始化 Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        let currentUser = null;
+
+        // 监听登录状态
+        auth.onAuthStateChanged((user) => {
+            currentUser = user;
+            updateUI();
+            if (user) {
+                loadPosts();
+            }
+        });
+
+        // 更新界面
+        function updateUI() {
+            const userInfo = document.getElementById('userInfo');
+            const authLinks = document.getElementById('authLinks');
+            const writeBtn = document.getElementById('writeBtn');
+            
+            if (currentUser) {
+                userInfo.classList.add('show');
+                authLinks.style.display = 'none';
+                writeBtn.style.display = 'inline';
+                document.getElementById('userEmail').textContent = currentUser.email;
+            } else {
+                userInfo.classList.remove('show');
+                authLinks.style.display = 'block';
+                writeBtn.style.display = 'none';
+            }
+        }
+
+        // 加载文章
+        function loadPosts() {
+            const container = document.getElementById('postsContainer');
+            container.innerHTML = '<div class="empty">加载中...</div>';
+            
+            db.collection('posts').orderBy('createdAt', 'desc').get()
+                .then((snapshot) => {
+                    if (snapshot.empty) {
+                        container.innerHTML = '<div class="empty">还没有文章，快来写第一篇吧！</div>';
+                        return;
+                    }
+                    container.innerHTML = '';
+                    snapshot.forEach((doc) => {
+                        const post = doc.data();
+                        const date = post.createdAt ? new Date(post.createdAt.seconds * 1000).toLocaleDateString() : '未知';
+                        const html = `
+                            <article class="post">
+                                <h2>${escapeHtml(post.title)}</h2>
+                                <div class="post-meta">${date} · ${escapeHtml(post.author)}</div>
+                                <div class="post-content">${escapeHtml(post.content).replace(/\n/g, '<br>')}</div>
+                            </article>
+                        `;
+                        container.innerHTML += html;
+                    });
+                })
+                .catch((err) => {
+                    container.innerHTML = '<div class="empty">加载失败: ' + err.message + '</div>';
+                });
+        }
+
+        // 注册
+        function register() {
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const errorEl = document.getElementById('registerError');
+            
+            if (password.length < 6) {
+                errorEl.textContent = '密码至少需要6位';
+                errorEl.style.display = 'block';
+                return;
+            }
+            
+            auth.createUserWithEmailAndPassword(email, password)
+                .then(() => {
+                    closeModal('registerModal');
+                    alert('注册成功！');
+                })
+                .catch((err) => {
+                    errorEl.textContent = err.message;
+                    errorEl.style.display = 'block';
+                });
+        }
+
+        // 登录
+        function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorEl = document.getElementById('loginError');
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .then(() => {
+                    closeModal('loginModal');
+                })
+                .catch((err) => {
+                    errorEl.textContent = err.message;
+                    errorEl.style.display = 'block';
+                });
+        }
+
+        // 退出
+        function logout() {
+            auth.signOut();
+        }
+
+        // 发布文章
+        function submitPost() {
+            if (!currentUser) {
+                alert('请先登录');
+                return;
+            }
+            
+            const title = document.getElementById('postTitle').value;
+            const content = document.getElementById('postContent').value;
+            const errorEl = document.getElementById('writeError');
+            
+            if (!title || !content) {
+                errorEl.textContent = '请填写标题和内容';
+                errorEl.style.display = 'block';
+                return;
+            }
+            
+            db.collection('posts').add({
+                title: title,
+                content: content,
+                author: currentUser.email,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                closeModal('writeModal');
+                document.getElementById('postTitle').value = '';
+                document.getElementById('postContent').value = '';
+                loadPosts();
+                alert('发布成功！');
+            })
+            .catch((err) => {
+                errorEl.textContent = err.message;
+                errorEl.style.display = 'block';
+            });
+        }
+
+        // 弹窗控制
+        function showLogin() {
+            closeModal('registerModal');
+            document.getElementById('loginModal').classList.add('show');
+        }
+        
+        function showRegister() {
+            closeModal('loginModal');
+            document.getElementById('registerModal').classList.add('show');
+        }
+        
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+            document.querySelectorAll('.error').forEach(el => el.style.display = 'none');
+        }
+
+        document.getElementById('loginBtn').onclick = () => document.getElementById('loginModal').classList.add('show');
+        document.getElementById('registerBtn').onclick = () => document.getElementById('registerModal').classList.add('show');
+        document.getElementById('writeBtn').onclick = () => document.getElementById('writeModal').classList.add('show');
+
+        // XSS 防护
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
 </body>
 </html>
